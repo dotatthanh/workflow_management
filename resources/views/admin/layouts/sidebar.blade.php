@@ -9,23 +9,22 @@
             <ul class="metismenu list-unstyled" id="side-menu">
                 <li class="menu-title" key="t-menu">Manage</li>
 
+                @can('Xem danh sách tài khoản')
                 <li>
                     <a href="{{ route('users.index') }}" class=" waves-effect">
                         <i class="bx bx-user"></i>
                         <span>Tài khoản</span>
                     </a>
                 </li>
+                @endcan
 
-                {{-- @can('Xem danh sách tài khoản', 'Xem danh sách vai trò', 'Xem danh sách quyền') --}}
+                @can('Xem danh sách vai trò', 'Xem danh sách quyền')
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-cog"></i>
                         <span>Cài đặt</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
-                        @can('Xem danh sách tài khoản')
-                        <li><a href="{{ route('users.index') }}">Tài khoản</a></li>
-                        @endcan
                         @can('Xem danh sách vai trò')
                         <li><a href="{{ route('roles.index') }}">Vai trò</a></li>
                         @endcan
@@ -34,7 +33,7 @@
                         @endcan
                     </ul>
                 </li>
-                {{-- @endcan --}}
+                @endcan
             </ul>
         </div>
     </div>

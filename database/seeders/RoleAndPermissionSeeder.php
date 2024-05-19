@@ -34,44 +34,6 @@ class RoleAndPermissionSeeder extends Seeder
         $super_admin->givePermissionTo($edit_category);
         $super_admin->givePermissionTo($delete_category);
 
-        $view_news = Permission::create(['name' => 'Xem danh sách tin tức']);
-        $create_news = Permission::create(['name' => 'Thêm tin tức']);
-        $edit_news = Permission::create(['name' => 'Chỉnh sửa tin tức']);
-        $delete_news = Permission::create(['name' => 'Xóa tin tức']);
-
-        $super_admin->givePermissionTo($view_news);
-        $super_admin->givePermissionTo($create_news);
-        $super_admin->givePermissionTo($edit_news);
-        $super_admin->givePermissionTo($delete_news);
-
-        $view_contact = Permission::create(['name' => 'Xem danh sách liên hệ']);
-        $delete_contact = Permission::create(['name' => 'Xóa liên hệ']);
-
-        $super_admin->givePermissionTo($view_contact);
-        $super_admin->givePermissionTo($delete_contact);
-
-        $view_product = Permission::create(['name' => 'Xem danh sách sản phẩm']);
-        $create_product = Permission::create(['name' => 'Thêm sản phẩm']);
-        $edit_product = Permission::create(['name' => 'Chỉnh sửa sản phẩm']);
-        $delete_product = Permission::create(['name' => 'Xóa sản phẩm']);
-
-        $super_admin->givePermissionTo($view_product);
-        $super_admin->givePermissionTo($create_product);
-        $super_admin->givePermissionTo($edit_product);
-        $super_admin->givePermissionTo($delete_product);
-
-        $view_info = Permission::create(['name' => 'Xem thông tin']);
-        $edit_info = Permission::create(['name' => 'Chỉnh sửa thông tin']);
-
-        $super_admin->givePermissionTo($view_info);
-        $super_admin->givePermissionTo($edit_info);
-
-        $view_customer = Permission::create(['name' => 'Xem danh sách khách hàng']);
-        $delete_customer = Permission::create(['name' => 'Xóa khách hàng']);
-
-        $super_admin->givePermissionTo($view_customer);
-        $super_admin->givePermissionTo($delete_customer);
-
         $view_user = Permission::create(['name' => 'Xem danh sách tài khoản']);
         $create_user = Permission::create(['name' => 'Thêm tài khoản']);
         $edit_user = Permission::create(['name' => 'Chỉnh sửa tài khoản']);
