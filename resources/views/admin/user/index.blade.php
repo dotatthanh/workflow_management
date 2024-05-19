@@ -32,7 +32,7 @@
 
                         <div class="col-sm-3">
                             <button type="submit" class="btn btn-success waves-effect waves-light">
-                                <i class="bx bx-search-alt search-icon font-size-16 align-middle mr-2"></i> Search
+                                <i class="bx bx-search-alt search-icon font-size-16 align-middle mr-2"></i> Tìm kiếm
                             </button>
                         </div>
 
@@ -40,7 +40,7 @@
                             <div class="text-sm-end">
                                 <a href="{{ route('users.create') }}"
                                     class="text-white btn btn-success btn-rounded waves-effect waves-light mb-2 mr-2"><i
-                                        class="mdi mdi-plus mr-1"></i> Add users</a>
+                                        class="mdi mdi-plus mr-1"></i> Thêm tài khoản</a>
                             </div>
                         </div>
                     </form>
@@ -53,6 +53,7 @@
                                     <th>Mã</th>
                                     <th>Ảnh đại diện</th>
                                     <th>Họ và tên</th>
+                                    <th>Vai trò</th>
                                     <th>Giới tính</th>
                                     <th>Số điện thoại</th>
                                     <th>Ngày sinh</th>
@@ -80,6 +81,11 @@
                                             @endif
                                         </td>
                                         <td>{{ $user->name }}</td>
+                                        <td>
+                                            @foreach ($user->roles as $role)
+                                                <span class="badge bg-secondary">{{ $role->name }}</span>
+                                            @endforeach
+                                        </td>
                                         <td>{{ $user->gender }}</td>
                                         <td>{{ $user->phone_number }}</td>
                                         <td>{{ date("d-m-Y", strtotime($user->birthday)) }}</td>
@@ -87,10 +93,13 @@
                                         <td class="text-center">
                                             @if ($user->id != 1)
                                             <ul class="list-inline font-size-20 contact-links mb-0">
+                                                @can('Chỉnh sửa tài khoản')
                                                 <li class="list-inline-item px">
                                                     <a href="{{ route('users.edit', $user->id) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
                                                 </li>
+                                                @endcan
 
+                                                @can('Xóa tài khoản')
                                                 <li class="list-inline-item px">
                                                     <form method="post" action="{{ route('users.destroy', $user->id) }}">
                                                         @csrf
@@ -99,6 +108,7 @@
                                                         <button type="submit" data-toggle="tooltip" data-placement="top" title="Xóa" class="border-0 bg-white"><i class="mdi mdi-trash-can text-danger"></i></button>
                                                     </form>
                                                 </li>
+                                                @endcan
                                             </ul>
                                             @endif
                                         </td>

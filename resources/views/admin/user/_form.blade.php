@@ -25,18 +25,6 @@
         </div>
 
         <div class="form-group mb-3">
-            {{-- <div class="docs-datepicker">
-                <div class="input-group">
-                    <input type="text" class="form-control docs-date" name="birthday" placeholder="Chọn ngày sinh" autocomplete="off" value="{{ old('birthday', isset($data_edit->gender) ? date('d-m-Y', strtotime($data_edit->birthday)) : '') }}">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-outline-secondary docs-datepicker-trigger" disabled="">
-                            <i class="fa fa-calendar" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="docs-datepicker-container"></div>
-            </div> --}}
-
             <label for="dob">Ngày sinh <span class="text-danger">*</span></label>
             <div class="input-group" id="datepicker1">
                 <input type="text"
@@ -96,6 +84,26 @@
             {!! $errors->first('address', '<span class="error">:message</span>') !!}
         </div>
 
+        <div class="form-group mb-3">
+            <label for="role">Vai trò <span class="text-danger">*</span></label>
+            <select
+                name="roles[]"
+                id="addRole"
+                class="select2 select2-multiple form-control"
+                multiple
+                data-placeholder="Chọn vai trò ..."
+            >
+                @foreach ($roles as $item)
+                    <option
+                        {{ isset($data_edit) && in_array($item->id, $data_edit->roles->pluck('id')->toArray()) ?
+                        'selected' : '' }}
+                        value="{{ $item->id }}">
+                        {{ $item->name }}
+                    </option>
+                @endforeach
+            </select>
+            {!! $errors->first('roles', '<span class="error">:message</span>') !!}
+        </div>
     </div>
 </div>
 

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -30,7 +31,7 @@ class UserController extends Controller
         }
 
         $data = [
-            'users' => $users,
+            'users' => $users
         ];
 
         return view('admin.user.index', $data);
@@ -43,7 +44,13 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('admin.user.create');
+        $roles = Role::all();
+
+        $data = [
+            'roles' => $roles
+        ];
+
+        return view('admin.user.create', $data);
     }
 
     /**
@@ -70,35 +77,42 @@ class UserController extends Controller
                 'password' => bcrypt($request->password),
                 'email' => $request->email,
                 'gender' => $request->gender,
-                'birthday' => date('Y-m-d', strtotime($request->birthday)),
+                'birthday' => date("Y-m-d", strtotime($request->birthday)),
                 'phone_number' => $request->phone_number,
                 'address' => $request->address,
                 'avatar' => $file_path,
             ]);
 
+            foreach ($request->roles as $role_id) {
+                $role = Role::find($role_id)->name;
+                $create->assignRole($role);
+            }
+
             $create->update([
-                'code' => 'TK'.str_pad($create->id, 6, '0', STR_PAD_LEFT),
+                'code' => 'TK'.str_pad($create->id, 6, '0', STR_PAD_LEFT)
             ]);
 
             DB::commit();
-
-            return redirect()->route('users.index')->with('alert-success', 'Thêm tài khoản thành công!');
+            return redirect()->route('users.index')->with('alert-success','Thêm tài khoản thành công!');
         } catch (Exception $e) {
             DB::rollback();
-
-            return redirect()->back()->with('alert-error', 'Thêm tài khoản thất bại!');
+            return redirect()->back()->with('alert-error','Thêm tài khoản thất bại!');
         }
     }
 
     /**
      * Display the specified resource.
      *
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function show(User $user)
     {
+        $roles = Role::all();
+
         $data = [
             'user' => $user,
+            'roles' => $roles
         ];
 
         return view('admin.user.profile', $data);
@@ -107,12 +121,16 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
+        $roles = Role::all();
+
         $data = [
             'data_edit' => $user,
+            'roles' => $roles
         ];
 
         return view('admin.user.edit', $data);
@@ -122,6 +140,7 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateUserRequest $request, User $user)
@@ -138,35 +157,42 @@ class UserController extends Controller
                     'name' => $request->name,
                     'email' => $request->email,
                     'gender' => $request->gender,
-                    'birthday' => date('Y-m-d', strtotime($request->birthday)),
+                    'birthday' => date("Y-m-d", strtotime($request->birthday)),
                     'phone_number' => $request->phone_number,
                     'address' => $request->address,
                     'avatar' => $file_path,
                 ]);
-            } else {
+            }
+            else {
                 $user->update([
                     'name' => $request->name,
                     'email' => $request->email,
                     'gender' => $request->gender,
-                    'birthday' => date('Y-m-d', strtotime($request->birthday)),
+                    'birthday' => date("Y-m-d", strtotime($request->birthday)),
                     'phone_number' => $request->phone_number,
                     'address' => $request->address,
                 ]);
             }
 
+            $user->roles()->detach();
+
+            foreach ($request->roles as $role_id) {
+                $role = Role::find($role_id)->name;
+                $user->assignRole($role);
+            }
+
             DB::commit();
-
-            return redirect()->route('users.index')->with('alert-success', 'Sửa tài khoản thành công!');
-        } catch (Exception) {
+            return redirect()->route('users.index')->with('alert-success','Sửa tài khoản thành công!');
+        } catch (Exception $e) {
             DB::rollback();
-
-            return redirect()->back()->with('alert-error', 'Sửa tài khoản thất bại!');
+            return redirect()->back()->with('alert-error','Sửa tài khoản thất bại!');
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
@@ -174,15 +200,14 @@ class UserController extends Controller
         try {
             DB::beginTransaction();
 
+            $user->roles()->detach();
             $user->destroy($user->id);
 
             DB::commit();
-
-            return redirect()->route('users.index')->with('alert-success', 'Xóa tài khoản thành công!');
+            return redirect()->route('users.index')->with('alert-success','Xóa tài khoản thành công!');
         } catch (Exception $e) {
             DB::rollback();
-
-            return redirect()->back()->with('alert-error', 'Xóa tài khoản thất bại!');
+            return redirect()->back()->with('alert-error','Xóa tài khoản thất bại!');
         }
     }
 
@@ -207,12 +232,10 @@ class UserController extends Controller
             }
 
             DB::commit();
-
-            return redirect()->back()->with('alert-success', 'Đổi mật khẩu thành công!');
+            return redirect()->back()->with('alert-success','Đổi mật khẩu thành công!');
         } catch (Exception $e) {
             DB::rollback();
-
-            return redirect()->back()->with('alert-error', 'Đổi mật khẩu thất bại!');
+            return redirect()->back()->with('alert-error','Đổi mật khẩu thất bại!');
         }
     }
 }

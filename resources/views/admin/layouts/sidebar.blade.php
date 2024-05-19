@@ -15,6 +15,26 @@
                         <span>Tài khoản</span>
                     </a>
                 </li>
+
+                {{-- @can('Xem danh sách tài khoản', 'Xem danh sách vai trò', 'Xem danh sách quyền') --}}
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="bx bx-cog"></i>
+                        <span>Cài đặt</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        @can('Xem danh sách tài khoản')
+                        <li><a href="{{ route('users.index') }}">Tài khoản</a></li>
+                        @endcan
+                        @can('Xem danh sách vai trò')
+                        <li><a href="{{ route('roles.index') }}">Vai trò</a></li>
+                        @endcan
+                        @can('Xem danh sách quyền')
+                        <li><a href="{{ route('permissions.index') }}">Quyền</a></li>
+                        @endcan
+                    </ul>
+                </li>
+                {{-- @endcan --}}
             </ul>
         </div>
     </div>
