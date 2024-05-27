@@ -1,8 +1,5 @@
 <?php
 
-use App\Models\Category;
-use App\Models\SubCategory;
-
 if (! function_exists('formatDate')) {
     function formatDate($date, $format = 'Y-m-d H:i:s')
     {
@@ -24,20 +21,6 @@ if (! function_exists('getConst')) {
     function getConst($key = '', $defaultValue = '')
     {
         return config('const.'.$key, $defaultValue);
-    }
-}
-
-if (! function_exists('getCategories')) {
-    function getCategories($parentCategoryId)
-    {
-        return Category::with('subCategories')->where('parent_category_id', $parentCategoryId)->get();
-    }
-}
-
-if (! function_exists('getSubCategories')) {
-    function getSubCategories($categoryId)
-    {
-        return SubCategory::where('category_id', $categoryId)->get();
     }
 }
 
