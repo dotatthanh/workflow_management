@@ -29,4 +29,4 @@
 </div>
 
 <button type="submit" class="btn btn-primary mr-1 waves-effect waves-light">Lưu lại</button>
-<a href="{{ route('users.index') }}" class="btn btn-secondary waves-effect">Quay lại</a>
+<a href="{{ route('labels.index') }}" class="btn btn-secondary waves-effect">Quay lại</a>
