@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\LabelController;
+use App\Http\Controllers\Admin\TaskController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,8 +26,16 @@ Route::prefix('admin')->group(function () {
 		Route::resource('permissions', PermissionController::class);
 
         Route::resource('users', UserController::class);
+        Route::resource('tasks', TaskController::class);
         Route::get('/users/view-change-password/{user}', [UserController::class, 'viewChangePassword'])->name('users.view-change-password');
         Route::post('/users/change-password/{user}', [UserController::class, 'changePassword'])->name('users.change-password');
     });
     require __DIR__.'/auth.php';
+});
+
+Route::get('{any}', function (Request $request) {
+    if (view()->exists($request->path())) {
+        return view($request->path());
+    }
+    return abort(404);
 });
