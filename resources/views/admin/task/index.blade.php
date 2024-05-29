@@ -38,7 +38,7 @@
 
                         <div class="col-sm-6">
                             <div class="text-sm-end">
-                                <a href="{{ route('users.create') }}"
+                                <a href="{{ route('tasks.create') }}"
                                     class="text-white btn btn-success btn-rounded waves-effect waves-light mb-2 mr-2"><i
                                         class="mdi mdi-plus mr-1"></i> Thêm công việc</a>
                             </div>
@@ -177,7 +177,7 @@
                         </table>
                     </div>
 
-                    {{-- {{ $users->links() }} --}}
+                    {{-- {{ $tasks->links() }} --}}
                 </div>
             </div>
         </div> <!-- end col -->
