@@ -27,6 +27,13 @@
                 </li>
                 {{-- @endcan --}}
 
+                <li>
+                    <a href="{{ route('tasks.index') }}" class=" waves-effect">
+                        <i class="bx bx-calendar"></i>
+                        <span>Công việc</span>
+                    </a>
+                </li>
+
                 @can(['Xem danh sách vai trò', 'Xem danh sách quyền'])
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">

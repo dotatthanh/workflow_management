@@ -54,6 +54,16 @@ class RoleAndPermissionSeeder extends Seeder
         $super_admin->givePermissionTo($edit_role);
         $super_admin->givePermissionTo($delete_role);
 
+        $view_label = Permission::create(['name' => 'Xem danh sách dán nhãn']);
+        $create_label = Permission::create(['name' => 'Thêm dán nhãn']);
+        $edit_label = Permission::create(['name' => 'Chỉnh sửa dán nhãn']);
+        $delete_label = Permission::create(['name' => 'Xóa dán nhãn']);
+
+        $super_admin->givePermissionTo($view_label);
+        $super_admin->givePermissionTo($create_label);
+        $super_admin->givePermissionTo($edit_label);
+        $super_admin->givePermissionTo($delete_label);
+
         $view_permission = Permission::create(['name' => 'Xem danh sách quyền']);
         $view_permission_detail = Permission::create(['name' => 'Xem quyền']);
         $edit_permission = Permission::create(['name' => 'Chỉnh sửa quyền']);
