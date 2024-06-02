@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ChangePasswordRequest;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\CommentRequest;
+use App\Http\Requests\StoreTaskRequest;
+use App\Models\Comment;
+use App\Models\Label;
+use App\Models\Task;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 
 class TaskController extends Controller
@@ -23,15 +23,22 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        $users = User::paginate(10);
+        $user = auth()->user();
+        $tasks = Task::query();
+        if (! $user->hasRole('Admin')) {
+            $tasks = $tasks->whereHas('users', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            });
+        }
+        $tasks = $tasks->paginate(10);
 
         if ($request->search) {
-            $users = User::where('name', 'like', '%'.$request->search.'%')->paginate(10);
-            $users->appends(['search' => $request->search]);
+            $tasks = Task::where('title', 'like', '%'.$request->search.'%')->paginate(10);
+            $tasks->appends(['search' => $request->search]);
         }
 
         $data = [
-            'users' => $users
+            'tasks' => $tasks
         ];
 
         return view('admin.task.index', $data);
@@ -44,10 +51,12 @@ class TaskController extends Controller
      */
     public function create()
     {
-        $roles = Role::all();
+        $users = User::all();
+        $labels = Label::all();
 
         $data = [
-            'roles' => $roles
+            'users' => $users,
+            'labels' => $labels,
         ];
 
         return view('admin.task.create', $data);
@@ -59,60 +68,49 @@ class TaskController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreUserRequest $request)
+    public function store(StoreTaskRequest $request)
     {
         try {
             DB::beginTransaction();
-
-            $file_path = '';
-            if ($request->file('avatar')) {
-                $name = time().'_'.$request->avatar->getClientOriginalName();
-                $file_path = 'uploads/avatar/user/'.$name;
-                Storage::disk('public_uploads')->putFileAs('avatar/user', $request->avatar, $name);
-            }
-
-            $create = User::create([
-                'code' => '',
-                'name' => $request->name,
-                'password' => bcrypt($request->password),
-                'email' => $request->email,
-                'gender' => $request->gender,
-                'birthday' => date("Y-m-d", strtotime($request->birthday)),
-                'phone_number' => $request->phone_number,
-                'address' => $request->address,
-                'avatar' => $file_path,
+            $task = Task::create([
+                'title' => $request->title,
+                'start_date' => date("Y-m-d", strtotime($request->start_date)),
+                'end_date' => date("Y-m-d", strtotime($request->end_date)),
+                'priority' => $request->priority,
+                'progress' => $request->progress,
+                'estimated_time' => $request->estimated_time ? date("Y-m-d", strtotime($request->estimated_time)) : null,
+                'description' => $request->description,
+                'status' => $request->status,
             ]);
 
-            foreach ($request->roles as $role_id) {
-                $role = Role::find($role_id)->name;
-                $create->assignRole($role);
-            }
-
-            $create->update([
-                'code' => 'TK'.str_pad($create->id, 6, '0', STR_PAD_LEFT)
-            ]);
+            $task->users()->attach($request->users);
+            $task->labels()->attach($request->labels);
 
             DB::commit();
-            return redirect()->route('users.index')->with('alert-success','Thêm tài khoản thành công!');
+            return redirect()->route('tasks.index')->with('alert-success','Thêm công việc thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Thêm tài khoản thất bại!');
+            return redirect()->back()->with('alert-error','Thêm công việc thất bại!');
         }
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\User  $user
+     * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show(Task $task)
     {
-        $roles = Role::all();
+        $users = User::all();
+        $labels = Label::all();
+        $comments = Comment::where('task_id', $task->id)->get();
 
         $data = [
-            'user' => $user,
-            'roles' => $roles
+            'users' => $users,
+            'labels' => $labels,
+            'data_edit' => $task,
+            'comments' => $comments,
         ];
 
         return view('admin.task.detail', $data);
@@ -121,16 +119,18 @@ class TaskController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\User  $user
+     * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function edit(User $user)
+    public function edit(Task $task)
     {
-        $roles = Role::all();
+        $users = User::all();
+        $labels = Label::all();
 
         $data = [
-            'data_edit' => $user,
-            'roles' => $roles
+            'users' => $users,
+            'labels' => $labels,
+            'data_edit' => $task,
         ];
 
         return view('admin.task.edit', $data);
@@ -140,102 +140,74 @@ class TaskController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
+     * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(StoreTaskRequest $request, Task $task)
     {
         try {
             DB::beginTransaction();
 
-            if ($request->file('avatar')) {
-                $name = time().'_'.$request->avatar->getClientOriginalName();
-                $file_path = 'uploads/avatar/user/'.$name;
-                Storage::disk('public_uploads')->putFileAs('avatar/user', $request->avatar, $name);
+            $task->update([
+                'title' => $request->title,
+                'start_date' => date("Y-m-d", strtotime($request->start_date)),
+                'end_date' => date("Y-m-d", strtotime($request->end_date)),
+                'priority' => $request->priority,
+                'progress' => $request->progress,
+                'estimated_time' => $request->estimated_time ? date("Y-m-d", strtotime($request->estimated_time)) : null,
+                'description' => $request->description,
+                'status' => $request->status,
+            ]);
 
-                $user->update([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'gender' => $request->gender,
-                    'birthday' => date("Y-m-d", strtotime($request->birthday)),
-                    'phone_number' => $request->phone_number,
-                    'address' => $request->address,
-                    'avatar' => $file_path,
-                ]);
-            }
-            else {
-                $user->update([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'gender' => $request->gender,
-                    'birthday' => date("Y-m-d", strtotime($request->birthday)),
-                    'phone_number' => $request->phone_number,
-                    'address' => $request->address,
-                ]);
-            }
-
-            $user->roles()->detach();
-
-            foreach ($request->roles as $role_id) {
-                $role = Role::find($role_id)->name;
-                $user->assignRole($role);
-            }
+            $task->users()->sync($request->users);
+            $task->labels()->sync($request->labels);
 
             DB::commit();
-            return redirect()->route('users.index')->with('alert-success','Sửa tài khoản thành công!');
+            return redirect()->route('tasks.index')->with('alert-success','Sửa công việc thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Sửa tài khoản thất bại!');
+            return redirect()->back()->with('alert-error','Sửa công việc thất bại!');
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\User  $user
+     * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy(Task $task)
     {
         try {
             DB::beginTransaction();
 
-            $user->roles()->detach();
-            $user->destroy($user->id);
+            $task->users()->detach();
+            $task->labels()->detach();
+            $task->destroy($task->id);
 
             DB::commit();
-            return redirect()->route('users.index')->with('alert-success','Xóa tài khoản thành công!');
+            return redirect()->route('tasks.index')->with('alert-success','Xóa công việc thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Xóa tài khoản thất bại!');
+            return redirect()->back()->with('alert-error','Xóa công việc thất bại!');
         }
     }
 
-    public function viewChangePassword(User $user)
-    {
-        $data = [
-            'user' => $user,
-        ];
+    public function comment(CommentRequest $request, $id) {
+        try {
+            DB::beginTransaction();
 
-        return view('admin.task.change-password', $data);
-    }
+            Comment::create([
+                'task_id' => $id,
+                'user_id' => auth()->id(),
+                'content' => $request->content,
+            ]);
 
-    public function changePassword(ChangePasswordRequest $request, User $user)
-    {
-        // try {
-        //     DB::beginTransaction();
-
-        //     if (Hash::check($request->password_old, $user->password)) {
-        //         $user->update([
-        //             'password' => Hash::make($request->password),
-        //         ]);
-        //     }
-
-        //     DB::commit();
-        //     return redirect()->back()->with('alert-success','Đổi mật khẩu thành công!');
-        // } catch (Exception $e) {
-        //     DB::rollback();
-        //     return redirect()->back()->with('alert-error','Đổi mật khẩu thất bại!');
-        // }
+            DB::commit();
+            return redirect()->back()->with('alert-success','Bạn đã bình luận thành công!');
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('alert-error','Bạn đã bình luận thất bại!');
+        }
     }
 }

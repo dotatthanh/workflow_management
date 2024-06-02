@@ -36,7 +36,7 @@
                     data-date-format="dd-mm-yyyy"
                     data-date-end-date="0d"
                     data-provide="datepicker"
-                    value="{{ old('birthday', isset($data_edit->gender) ? date('d-m-Y', strtotime($data_edit->birthday)) : '') }}"
+                    value="{{ old('birthday', isset($data_edit->birthday) ? date('d-m-Y', strtotime($data_edit->birthday)) : '') }}"
                 >
                 <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
             </div>
@@ -67,7 +67,7 @@
         </div>
 
         <div class="form-group mb-3">
-            <label for="avatar">Ảnh đại diện</label>
+            <label for="avatar">Ảnh đại diện @if($routeType == 'create')<span class="text-danger">*</span>@endif</label>
             <input id="avatar" name="avatar" type="file" class="form-control">
             {!! $errors->first('avatar', '<span class="error">:message</span>') !!}
         </div>

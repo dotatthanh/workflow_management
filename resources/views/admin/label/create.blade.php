@@ -1,7 +1,7 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Tạo nhãn dán
+    Thêm nhãn dán
 @endsection
 
 @section('content')
@@ -10,7 +10,7 @@
             Nhãn dán
         @endslot
         @slot('title')
-            Tạo nhãn dán
+            Thêm nhãn dán
         @endslot
     @endcomponent
 
@@ -18,7 +18,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-4">Tạo nhãn dán</h4>
+                    <h4 class="card-title mb-4">Thêm nhãn dán</h4>
 
                     <form method="POST" action="{{ route('labels.store') }}" enctype="multipart/form-data">
 

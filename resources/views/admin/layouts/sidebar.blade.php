@@ -7,7 +7,14 @@
         <div id="sidebar-menu">
             <!-- Left Menu Start -->
             <ul class="metismenu list-unstyled" id="side-menu">
-                <li class="menu-title" key="t-menu">Manage</li>
+                <li class="menu-title" key="t-menu">Quản lý</li>
+
+                <li>
+                    <a href="{{ route('dashboard') }}" class="waves-effect">
+                        <i class="bx bx-home-circle"></i>
+                        <span key="t-dashboards">Trang chủ</span>
+                    </a>
+                </li>
 
                 @can('Xem danh sách tài khoản')
                 <li>
@@ -18,21 +25,23 @@
                 </li>
                 @endcan
 
-                {{-- @can('Xem danh sách nhãn dán') --}}
+                @can('Xem danh sách nhãn dán')
                 <li>
                     <a href="{{ route('labels.index') }}" class=" waves-effect">
-                        <i class="bx bx-user"></i>
+                        <i class="bx bx-label"></i>
                         <span>Nhãn dán</span>
                     </a>
                 </li>
-                {{-- @endcan --}}
+                @endcan
 
+                @can('Xem danh sách công việc')
                 <li>
                     <a href="{{ route('tasks.index') }}" class=" waves-effect">
                         <i class="bx bx-calendar"></i>
                         <span>Công việc</span>
                     </a>
                 </li>
+                @endcan
 
                 @can(['Xem danh sách vai trò', 'Xem danh sách quyền'])
                 <li>

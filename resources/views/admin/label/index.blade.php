@@ -36,6 +36,7 @@
                             </button>
                         </div>
 
+                        @can('Thêm nhãn dán')
                         <div class="col-sm-6">
                             <div class="text-sm-end">
                                 <a href="{{ route('labels.create') }}"
@@ -43,6 +44,7 @@
                                         class="mdi mdi-plus mr-1"></i> Thêm nhãn dán</a>
                             </div>
                         </div>
+                        @endcan
                     </form>
 
                     <div class="table-responsive">
@@ -66,13 +68,13 @@
                                         </td>
                                         <td class="text-center">
                                             <ul class="list-inline font-size-20 contact-links mb-0">
-                                                {{-- @can('Chỉnh sửa nhãn dán') --}}
+                                                @can('Chỉnh sửa nhãn dán')
                                                 <li class="list-inline-item px">
                                                     <a href="{{ route('labels.edit', $item->id) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
                                                 </li>
-                                                {{-- @endcan --}}
+                                                @endcan
 
-                                                {{-- @can('Xóa nhãn dán') --}}
+                                                @can('Xóa nhãn dán')
                                                 <li class="list-inline-item px">
                                                     <form method="post" action="{{ route('labels.destroy', $item->id) }}">
                                                         @csrf
@@ -81,7 +83,7 @@
                                                         <button type="submit" data-toggle="tooltip" data-placement="top" title="Xóa" class="border-0 bg-white"><i class="mdi mdi-trash-can text-danger"></i></button>
                                                     </form>
                                                 </li>
-                                                {{-- @endcan --}}
+                                                @endcan
                                             </ul>
                                         </td>
                                     </tr>

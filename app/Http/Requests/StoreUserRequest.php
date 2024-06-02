@@ -32,6 +32,7 @@ class StoreUserRequest extends FormRequest
             'address' => 'required',
             'password' => 'required|confirmed|min:8|string',
             'avatar' => 'required|image',
+            'roles' => 'required',
         ];
     }
 
@@ -57,6 +58,7 @@ class StoreUserRequest extends FormRequest
             'password.string' => 'Mật khẩu phải là một chuỗi',
             'avatar.required' => 'Ảnh đại diện là trường bắt buộc!',
             'avatar.image' => 'Ảnh đại diện phải là tệp tin dạng ảnh!',
+            'roles.required' => 'Vai trò là trường bắt buộc.',
         ];
     }
 }

@@ -36,6 +36,7 @@
                             </button>
                         </div>
 
+                        @can('Thêm tài khoản')
                         <div class="col-sm-6">
                             <div class="text-sm-end">
                                 <a href="{{ route('users.create') }}"
@@ -43,6 +44,7 @@
                                         class="mdi mdi-plus mr-1"></i> Thêm tài khoản</a>
                             </div>
                         </div>
+                        @endcan
                     </form>
 
                     <div class="table-responsive">

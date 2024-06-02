@@ -22,18 +22,6 @@ class RoleAndPermissionSeeder extends Seeder
         // Gán vai trò
         User::find(1)->assignRole('Admin');
 
-        // Tạo quyền
-        $view_category = Permission::create(['name' => 'Xem danh sách danh mục']);
-        $create_category = Permission::create(['name' => 'Thêm danh mục']);
-        $edit_category = Permission::create(['name' => 'Chỉnh sửa danh mục']);
-        $delete_category = Permission::create(['name' => 'Xóa danh mục']);
-
-        // Set quyền cho vai trò admin
-        $super_admin->givePermissionTo($view_category);
-        $super_admin->givePermissionTo($create_category);
-        $super_admin->givePermissionTo($edit_category);
-        $super_admin->givePermissionTo($delete_category);
-
         $view_user = Permission::create(['name' => 'Xem danh sách tài khoản']);
         $create_user = Permission::create(['name' => 'Thêm tài khoản']);
         $edit_user = Permission::create(['name' => 'Chỉnh sửa tài khoản']);
@@ -44,6 +32,30 @@ class RoleAndPermissionSeeder extends Seeder
         $super_admin->givePermissionTo($edit_user);
         $super_admin->givePermissionTo($delete_user);
 
+        $view_label = Permission::create(['name' => 'Xem danh sách nhãn dán']);
+        $create_label = Permission::create(['name' => 'Thêm nhãn dán']);
+        $edit_label = Permission::create(['name' => 'Chỉnh sửa nhãn dán']);
+        $delete_label = Permission::create(['name' => 'Xóa nhãn dán']);
+
+        $super_admin->givePermissionTo($view_label);
+        $super_admin->givePermissionTo($create_label);
+        $super_admin->givePermissionTo($edit_label);
+        $super_admin->givePermissionTo($delete_label);
+
+        // Tạo quyền
+        $view_task = Permission::create(['name' => 'Xem danh sách công việc']);
+        $detail_task = Permission::create(['name' => 'Xem chi tiết công việc']);
+        $create_task = Permission::create(['name' => 'Thêm công việc']);
+        $edit_task = Permission::create(['name' => 'Chỉnh sửa công việc']);
+        $delete_task = Permission::create(['name' => 'Xóa công việc']);
+
+        // Set quyền cho vai trò admin
+        $super_admin->givePermissionTo($view_task);
+        $super_admin->givePermissionTo($detail_task);
+        $super_admin->givePermissionTo($create_task);
+        $super_admin->givePermissionTo($edit_task);
+        $super_admin->givePermissionTo($delete_task);
+
         $view_role = Permission::create(['name' => 'Xem danh sách vai trò']);
         $create_role = Permission::create(['name' => 'Thêm vai trò']);
         $edit_role = Permission::create(['name' => 'Chỉnh sửa vai trò']);
@@ -53,16 +65,6 @@ class RoleAndPermissionSeeder extends Seeder
         $super_admin->givePermissionTo($create_role);
         $super_admin->givePermissionTo($edit_role);
         $super_admin->givePermissionTo($delete_role);
-
-        $view_label = Permission::create(['name' => 'Xem danh sách dán nhãn']);
-        $create_label = Permission::create(['name' => 'Thêm dán nhãn']);
-        $edit_label = Permission::create(['name' => 'Chỉnh sửa dán nhãn']);
-        $delete_label = Permission::create(['name' => 'Xóa dán nhãn']);
-
-        $super_admin->givePermissionTo($view_label);
-        $super_admin->givePermissionTo($create_label);
-        $super_admin->givePermissionTo($edit_label);
-        $super_admin->givePermissionTo($delete_label);
 
         $view_permission = Permission::create(['name' => 'Xem danh sách quyền']);
         $view_permission_detail = Permission::create(['name' => 'Xem quyền']);

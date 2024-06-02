@@ -24,11 +24,26 @@ if (! function_exists('getConst')) {
     }
 }
 
-if (! function_exists('isCurrentPage')) {
-    function isCurrentPage($segment)
-    {
-        if (request()->segment(1) === $segment)
-            return "class=current";
-        return '';
+function timeAgo($timestamp) {
+    $time = time() - strtotime($timestamp);
+
+    if ($time < 1) {
+        return 'Vừa xong';
+    }
+
+    $tokens = [
+        31536000 => 'năm',
+        2592000 => 'tháng',
+        604800 => 'tuần',
+        86400 => 'ngày',
+        3600 => 'giờ',
+        60 => 'phút',
+        1 => 'giây'
+    ];
+
+    foreach ($tokens as $unit => $text) {
+        if ($time < $unit) continue;
+        $numberOfUnits = floor($time / $unit);
+        return $numberOfUnits . ' ' . $text . ' trước';
     }
 }

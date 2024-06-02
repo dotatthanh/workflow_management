@@ -33,20 +33,20 @@ var options = {
     chart = new ApexCharts(document.querySelector("#line-chart"), options);
 chart.render();
 options = {
-  series: [56, 38, 26],
+  series: series,
   chart: {
     type: "donut",
-    height: 262
+    height: 500
   },
-  labels: ["Series A", "Series B", "Series C"],
-  colors: ["#556ee6", "#34c38f", "#f46a6a"],
+  labels: labels,
+  colors: colors,
   legend: {
     show: !1
   },
   plotOptions: {
     pie: {
       donut: {
-        size: "70%"
+        size: "0%"
       }
     }
   }

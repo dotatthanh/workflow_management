@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
@@ -21,14 +22,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->group(function () {
     Route::middleware(['auth'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
         Route::resource('roles', RoleController::class);
         Route::resource('labels', LabelController::class);
 		Route::resource('permissions', PermissionController::class);
 
         Route::resource('users', UserController::class);
-        Route::resource('tasks', TaskController::class);
         Route::get('/users/view-change-password/{user}', [UserController::class, 'viewChangePassword'])->name('users.view-change-password');
         Route::post('/users/change-password/{user}', [UserController::class, 'changePassword'])->name('users.change-password');
+
+        Route::resource('tasks', TaskController::class);
+        Route::post('/tasks/comment/{id}', [TaskController::class, 'comment'])->name('tasks.comment');
     });
     require __DIR__.'/auth.php';
 });

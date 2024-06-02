@@ -7,7 +7,7 @@
 @section('content')
     @component('components.breadcrumb')
         @slot('li_1')
-            công việc
+            Công việc
         @endslot
         @slot('title')
             Danh sách công việc
@@ -36,13 +36,16 @@
                             </button>
                         </div>
 
+                        @can('Thêm công việc')
                         <div class="col-sm-6">
                             <div class="text-sm-end">
                                 <a href="{{ route('tasks.create') }}"
-                                    class="text-white btn btn-success btn-rounded waves-effect waves-light mb-2 mr-2"><i
-                                        class="mdi mdi-plus mr-1"></i> Thêm công việc</a>
+                                    class="text-white btn btn-success btn-rounded waves-effect waves-light mb-2 mr-2">
+                                    <i class="mdi mdi-plus mr-1"></i> Thêm công việc
+                                </a>
                             </div>
                         </div>
+                        @endcan
                     </form>
 
                     <div class="table-responsive">
@@ -61,123 +64,58 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php ($stt = 1)
+                                @foreach ($tasks as $item)
                                 <tr>
                                     <td class="text-center">1</td>
-                                    <td>Phân công giảng dạy</td>
+                                    <td>{{ $item->title }}</td>
                                     <td>
-                                        <span class="badge bg-primary">Nguyễn Đức Trung</span>
+                                        @foreach ($item->users as $user)
+                                            <span class="badge bg-primary">{{ $user->name }}</span>
+                                        @endforeach
                                     </td>
                                     <td>
-                                        <span class="badge" style="background-color: #9f8fef;">Công việc đào tạo</span>
+                                        @foreach ($item->labels as $label)
+                                            <span class="badge" style="background-color: {{ $label->color }};">{{ $label->name }}</span>
+                                        @endforeach
                                     </td>
-                                    <td>Cao</td>
-                                    <td>100%</td>
-                                    <td>01/02/2024</td>
-                                    <td>Đã hoàn thành</td>
+                                    <td>{{ getConst('priorityTasks')[$item->priority] }}</td>
+                                    <td>{{ $item->progress }}</td>
+                                    <td>{{ formatDate($item->estimated_time, 'd-m-Y') }}</td>
+                                    <td>{{ getConst('statusTasks')[$item->status] }}</td>
                                     <td class="text-center">
                                         <ul class="list-inline font-size-20 contact-links mb-0">
+                                            @can('Xem chi tiết công việc')
                                             <li class="list-inline-item px">
-                                                <a href="{{ route('tasks.show', 1) }}" data-toggle="tooltip" data-placement="top" title="Xem chi tiết"><i class="bx bx bx-detail text-success"></i></a>
+                                                <a href="{{ route('tasks.show', $item->id) }}" data-toggle="tooltip" data-placement="top" title="Xem chi tiết"><i class="bx bx bx-detail text-success"></i></a>
                                             </li>
-                                            {{-- @can('Chỉnh sửa công việc') --}}
-                                            <li class="list-inline-item px">
-                                                <a href="{{ route('tasks.edit', 1) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
-                                            </li>
-                                            {{-- @endcan --}}
+                                            @endcan
 
-                                            {{-- @can('Xóa công việc') --}}
+                                            @can('Chỉnh sửa công việc')
                                             <li class="list-inline-item px">
-                                                <form method="post" action="{{ route('tasks.destroy', 1) }}">
+                                                <a href="{{ route('tasks.edit', $item->id) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
+                                            </li>
+                                            @endcan
+
+                                            @can('Xóa công việc')
+                                            <li class="list-inline-item px">
+                                                <form method="post" action="{{ route('tasks.destroy', $item->id) }}">
                                                     @csrf
                                                     @method('DELETE')
 
                                                     <button type="submit" data-toggle="tooltip" data-placement="top" title="Xóa" class="border-0 bg-white"><i class="mdi mdi-trash-can text-danger"></i></button>
                                                 </form>
                                             </li>
-                                            {{-- @endcan --}}
+                                            @endcan
                                         </ul>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td class="text-center">1</td>
-                                    <td>Nhập điểm lên hệ thống</td>
-                                    <td>
-                                        <span class="badge bg-primary">Nguyễn Văn Đức</span>
-                                        <span class="badge bg-primary">Đỗ Ánh Dương</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge" style="background-color: #f5cd47;">Công việc khoa</span>
-                                    </td>
-                                    <td>Cao</td>
-                                    <td>10%</td>
-                                    <td>15/06/2024</td>
-                                    <td>Đang làm</td>
-                                    <td class="text-center">
-                                        <ul class="list-inline font-size-20 contact-links mb-0">
-                                            <li class="list-inline-item px">
-                                                <a href="{{ route('tasks.show', 1) }}" data-toggle="tooltip" data-placement="top" title="Xem chi tiết"><i class="bx bx bx-detail text-success"></i></a>
-                                            </li>
-                                            {{-- @can('Chỉnh sửa công việc') --}}
-                                            <li class="list-inline-item px">
-                                                <a href="{{ route('tasks.edit', 1) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
-                                            </li>
-                                            {{-- @endcan --}}
-
-                                            {{-- @can('Xóa công việc') --}}
-                                            <li class="list-inline-item px">
-                                                <form method="post" action="{{ route('tasks.destroy', 1) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-
-                                                    <button type="submit" data-toggle="tooltip" data-placement="top" title="Xóa" class="border-0 bg-white"><i class="mdi mdi-trash-can text-danger"></i></button>
-                                                </form>
-                                            </li>
-                                            {{-- @endcan --}}
-                                        </ul>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">1</td>
-                                    <td>Kiểm tra điện phòng A12</td>
-                                    <td>
-                                        <span class="badge bg-primary">Nguyễn Đình Nam</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge" style="background-color: #94c748;">Công việc quản lý</span>
-                                    </td>
-                                    <td>Cao</td>
-                                    <td>0%</td>
-                                    <td>22/05/2024</td>
-                                    <td>Đã huỷ</td>
-                                    <td class="text-center">
-                                        <ul class="list-inline font-size-20 contact-links mb-0">
-                                            <li class="list-inline-item px">
-                                                <a href="{{ route('tasks.show', 1) }}" data-toggle="tooltip" data-placement="top" title="Xem chi tiết"><i class="bx bx bx-detail text-success"></i></a>
-                                            </li>
-                                            {{-- @can('Chỉnh sửa công việc') --}}
-                                            <li class="list-inline-item px">
-                                                <a href="{{ route('tasks.edit', 1) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
-                                            </li>
-                                            {{-- @endcan --}}
-
-                                            {{-- @can('Xóa công việc') --}}
-                                            <li class="list-inline-item px">
-                                                <form method="post" action="{{ route('tasks.destroy', 1) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-
-                                                    <button type="submit" data-toggle="tooltip" data-placement="top" title="Xóa" class="border-0 bg-white"><i class="mdi mdi-trash-can text-danger"></i></button>
-                                                </form>
-                                            </li>
-                                            {{-- @endcan --}}
-                                        </ul>
-                                    </td>
-                                </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
 
-                    {{-- {{ $tasks->links() }} --}}
+                    {{ $tasks->links() }}
                 </div>
             </div>
         </div> <!-- end col -->
