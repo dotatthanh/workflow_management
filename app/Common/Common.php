@@ -24,7 +24,8 @@ if (! function_exists('getConst')) {
     }
 }
 
-function timeAgo($timestamp) {
+function timeAgo($timestamp)
+{
     $time = time() - strtotime($timestamp);
 
     if ($time < 1) {
@@ -38,12 +39,15 @@ function timeAgo($timestamp) {
         86400 => 'ngày',
         3600 => 'giờ',
         60 => 'phút',
-        1 => 'giây'
+        1 => 'giây',
     ];
 
     foreach ($tokens as $unit => $text) {
-        if ($time < $unit) continue;
+        if ($time < $unit) {
+            continue;
+        }
         $numberOfUnits = floor($time / $unit);
-        return $numberOfUnits . ' ' . $text . ' trước';
+
+        return $numberOfUnits.' '.$text.' trước';
     }
 }

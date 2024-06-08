@@ -36,7 +36,7 @@
                             </button>
                         </div>
 
-                        @can('Thêm tài khoản')
+                        {{-- @can('Thêm tài khoản') --}}
                         <div class="col-sm-6">
                             <div class="text-sm-end">
                                 <a href="{{ route('users.create') }}"
@@ -44,7 +44,7 @@
                                         class="mdi mdi-plus mr-1"></i> Thêm tài khoản</a>
                             </div>
                         </div>
-                        @endcan
+                        {{-- @endcan --}}
                     </form>
 
                     <div class="table-responsive">
@@ -54,6 +54,7 @@
                                     <th style="width: 70px;" class="text-center">STT</th>
                                     <th>Mã</th>
                                     <th>Ảnh đại diện</th>
+                                    <th>Bộ môn</th>
                                     <th>Họ và tên</th>
                                     <th>Vai trò</th>
                                     <th>Giới tính</th>
@@ -82,6 +83,7 @@
                                                 </div>
                                             @endif
                                         </td>
+                                        <td>{{ $user->department?->name }}</td>
                                         <td>{{ $user->name }}</td>
                                         <td>
                                             @foreach ($user->roles as $role)
@@ -95,13 +97,14 @@
                                         <td class="text-center">
                                             @if ($user->id != 1)
                                             <ul class="list-inline font-size-20 contact-links mb-0">
-                                                @can('Chỉnh sửa tài khoản')
+                                                {{-- @can('Chỉnh sửa tài khoản') --}}
                                                 <li class="list-inline-item px">
                                                     <a href="{{ route('users.edit', $user->id) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
                                                 </li>
-                                                @endcan
+                                                {{-- @endcan --}}
 
-                                                @can('Xóa tài khoản')
+                                                {{-- @can('Xóa tài khoản') --}}
+                                                @if (auth()->id() != $user->id)
                                                 <li class="list-inline-item px">
                                                     <form method="post" action="{{ route('users.destroy', $user->id) }}">
                                                         @csrf
@@ -110,7 +113,8 @@
                                                         <button type="submit" data-toggle="tooltip" data-placement="top" title="Xóa" class="border-0 bg-white"><i class="mdi mdi-trash-can text-danger"></i></button>
                                                     </form>
                                                 </li>
-                                                @endcan
+                                                @endif
+                                                {{-- @endcan --}}
                                             </ul>
                                             @endif
                                         </td>

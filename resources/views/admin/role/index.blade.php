@@ -58,7 +58,7 @@
                                         <td class="text-center">{{ $stt++ }}</td>
                                         <td>{{ $role->name }}</td>
                                         <td class="text-center">
-                                            @if ($role->id != 1)
+                                            @if ($role->id > 2)
                                                 <ul class="list-inline font-size-20 contact-links mb-0">
                                                     @can('Chỉnh sửa vai trò')
                                                     <li class="list-inline-item px">

@@ -10,6 +10,7 @@ class Task extends Model
     use HasFactory;
 
     protected $fillable = [
+        'department_id',
         'title',
         'start_date',
         'end_date',
@@ -28,5 +29,10 @@ class Task extends Model
     public function labels()
     {
         return $this->belongsToMany(Label::class, 'task_labels');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }

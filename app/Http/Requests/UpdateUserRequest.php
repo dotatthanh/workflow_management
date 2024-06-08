@@ -24,7 +24,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'name' => 'required|max:255',
             'email' => [
                 'required', 'string', 'email', 'max:255',
@@ -37,11 +37,17 @@ class UpdateUserRequest extends FormRequest
             'avatar' => 'nullable|image',
             'roles' => 'required',
         ];
+
+        if (auth()->user()->hasRole('Admin')) {
+            $rules['department_id'] = 'required';
+        }
+
+        return $rules;
     }
 
     public function messages()
     {
-        return [
+        $messages = [
             'name.required' => 'Họ và tên là trường bắt buộc.',
             'name.max' => 'Họ và tên không được dài quá :max ký tự.',
             'gender.required' => 'Giới tính là trường bắt buộc.',
@@ -58,5 +64,11 @@ class UpdateUserRequest extends FormRequest
             'avatar.image' => 'Ảnh đại diện phải là tệp tin dạng ảnh!',
             'roles.required' => 'Vai trò là trường bắt buộc.',
         ];
+
+        if (auth()->user()->hasRole('Admin')) {
+            $messages['department_id.required'] = 'Bộ môn là trường bắt buộc.';
+        }
+
+        return $messages;
     }
 }

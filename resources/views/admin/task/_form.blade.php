@@ -7,16 +7,35 @@
     </div>
 </div>
 
+@hasrole('Admin')
+<div class="form-group row mb-4">
+    <label for="department_id" class="col-form-label col-lg-2">Bộ môn <span class="text-danger">*</span></label>
+    <div class="col-lg-10">
+        <select name="department_id" id="department_id" class="form-control" {{ isset($isDetailPage) ? 'disabled' : ''}} onchange="changeDepartment()">
+            <option value="">Chọn bộ môn</option>
+            @foreach ($departments as $item)
+                <option value="{{ $item->id }}"
+                    {{ old('department_id', $data_edit->department_id ?? '') == $item->id ? 'selected' : '' }}>
+                    {{ $item->name }}
+                </option>
+            @endforeach
+        </select>
+        {!! $errors->first('department_id', '<span class="error">:message</span>') !!}
+    </div>
+</div>
+@endhasrole
+
+@hasanyrole('Admin|Trưởng bộ môn')
 <div class="form-group row mb-4">
     <label for="users" class="col-form-label col-lg-2">Người thực hiện</label>
     <div class="col-lg-10">
         <select name="users[]" id="users"
             {{ isset($isDetailPage) ? 'disabled' : ''}}
             class="select2 select2-multiple form-control" multiple
-            data-placeholder="Chọn thực hiện">
+            data-placeholder="Chọn người thực hiện">
             @foreach ($users as $item)
                 <option
-                    {{ isset($data_edit) && in_array($item->id, $data_edit->users->pluck('id')->toArray()) ? 'selected' : '' }}
+                    {{ isset($data_edit) && in_array($item->id, old('users', $data_edit->users->pluck('id')->toArray())) ? 'selected' : '' }}
                     value="{{ $item->id }}">
                     {{ $item->name }}
                 </option>
@@ -25,6 +44,7 @@
         {!! $errors->first('users', '<span class="error">:message</span>') !!}
     </div>
 </div>
+@endhasanyrole
 
 <div class="form-group row mb-4">
     <label for="labels" class="col-form-label col-lg-2">Nhãn dán</label>
@@ -35,7 +55,7 @@
             data-placeholder="Chọn nhãn dán">
             @foreach ($labels as $item)
                 <option
-                    {{ isset($data_edit) && in_array($item->id, $data_edit->labels->pluck('id')->toArray()) ? 'selected' : '' }}
+                    {{ isset($data_edit) && in_array($item->id, old('labels', $data_edit->labels->pluck('id')->toArray())) ? 'selected' : '' }}
                     value="{{ $item->id }}">
                     {{ $item->name }}
                 </option>

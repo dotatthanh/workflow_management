@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Label;
 use App\Http\Requests\StoreLabelRequest;
+use App\Models\Label;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LabelController extends Controller
@@ -26,7 +26,7 @@ class LabelController extends Controller
         }
 
         $data = [
-            'labels' => $labels
+            'labels' => $labels,
         ];
 
         return view('admin.label.index', $data);
@@ -59,10 +59,12 @@ class LabelController extends Controller
             ]);
 
             DB::commit();
-            return redirect()->route('labels.index')->with('alert-success','Thêm nhãn dán thành công!');
+
+            return redirect()->route('labels.index')->with('alert-success', 'Thêm nhãn dán thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Thêm nhãn dán thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Thêm nhãn dán thất bại!');
         }
     }
 
@@ -112,10 +114,12 @@ class LabelController extends Controller
             ]);
 
             DB::commit();
-            return redirect()->route('labels.index')->with('alert-success','Cập nhật nhãn dán thành công!');
+
+            return redirect()->route('labels.index')->with('alert-success', 'Cập nhật nhãn dán thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Cập nhật nhãn dán thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Cập nhật nhãn dán thất bại!');
         }
     }
 
@@ -134,10 +138,12 @@ class LabelController extends Controller
             $label->destroy($id);
 
             DB::commit();
-            return redirect()->route('labels.index')->with('alert-success','Xóa nhãn dán thành công!');
+
+            return redirect()->route('labels.index')->with('alert-success', 'Xóa nhãn dán thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Xóa nhãn dán thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Xóa nhãn dán thất bại!');
         }
     }
 }

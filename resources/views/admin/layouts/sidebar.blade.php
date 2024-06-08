@@ -16,14 +16,23 @@
                     </a>
                 </li>
 
-                @can('Xem danh sách tài khoản')
+                @can('Xem danh sách bộ môn')
+                <li>
+                    <a href="{{ route('departments.index') }}" class=" waves-effect">
+                        <i class="bx bx-user"></i>
+                        <span>Bộ môn</span>
+                    </a>
+                </li>
+                @endcan
+
+                @hasanyrole('Admin|Trưởng bộ môn')
                 <li>
                     <a href="{{ route('users.index') }}" class=" waves-effect">
                         <i class="bx bx-user"></i>
                         <span>Tài khoản</span>
                     </a>
                 </li>
-                @endcan
+                @endhasanyrole
 
                 @can('Xem danh sách nhãn dán')
                 <li>
@@ -34,14 +43,14 @@
                 </li>
                 @endcan
 
-                @can('Xem danh sách công việc')
+                {{-- @can('Xem danh sách công việc') --}}
                 <li>
                     <a href="{{ route('tasks.index') }}" class=" waves-effect">
                         <i class="bx bx-calendar"></i>
                         <span>Công việc</span>
                     </a>
                 </li>
-                @endcan
+                {{-- @endcan --}}
 
                 @can(['Xem danh sách vai trò', 'Xem danh sách quyền'])
                 <li>

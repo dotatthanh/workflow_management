@@ -36,7 +36,7 @@
                             </button>
                         </div>
 
-                        @can('Thêm công việc')
+                        {{-- @can('Thêm công việc') --}}
                         <div class="col-sm-6">
                             <div class="text-sm-end">
                                 <a href="{{ route('tasks.create') }}"
@@ -45,7 +45,7 @@
                                 </a>
                             </div>
                         </div>
-                        @endcan
+                        {{-- @endcan --}}
                     </form>
 
                     <div class="table-responsive">
@@ -54,6 +54,7 @@
                                 <tr>
                                     <th style="width: 70px;" class="text-center">STT</th>
                                     <th>Tiêu đề</th>
+                                    <th>Bộ môn</th>
                                     <th>Người thực hiện</th>
                                     <th>Nhãn dán</th>
                                     <th>Mức độ ưu tiên</th>
@@ -69,6 +70,7 @@
                                 <tr>
                                     <td class="text-center">1</td>
                                     <td>{{ $item->title }}</td>
+                                    <td>{{ $item->department->name }}</td>
                                     <td>
                                         @foreach ($item->users as $user)
                                             <span class="badge bg-primary">{{ $user->name }}</span>
@@ -85,19 +87,19 @@
                                     <td>{{ getConst('statusTasks')[$item->status] }}</td>
                                     <td class="text-center">
                                         <ul class="list-inline font-size-20 contact-links mb-0">
-                                            @can('Xem chi tiết công việc')
+                                            {{-- @can('Xem chi tiết công việc') --}}
                                             <li class="list-inline-item px">
                                                 <a href="{{ route('tasks.show', $item->id) }}" data-toggle="tooltip" data-placement="top" title="Xem chi tiết"><i class="bx bx bx-detail text-success"></i></a>
                                             </li>
-                                            @endcan
+                                            {{-- @endcan --}}
 
-                                            @can('Chỉnh sửa công việc')
+                                            {{-- @can('Chỉnh sửa công việc') --}}
                                             <li class="list-inline-item px">
                                                 <a href="{{ route('tasks.edit', $item->id) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
                                             </li>
-                                            @endcan
+                                            {{-- @endcan --}}
 
-                                            @can('Xóa công việc')
+                                            {{-- @can('Xóa công việc') --}}
                                             <li class="list-inline-item px">
                                                 <form method="post" action="{{ route('tasks.destroy', $item->id) }}">
                                                     @csrf
@@ -106,7 +108,7 @@
                                                     <button type="submit" data-toggle="tooltip" data-placement="top" title="Xóa" class="border-0 bg-white"><i class="mdi mdi-trash-can text-danger"></i></button>
                                                 </form>
                                             </li>
-                                            @endcan
+                                            {{-- @endcan --}}
                                         </ul>
                                     </td>
                                 </tr>

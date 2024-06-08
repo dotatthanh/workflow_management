@@ -1,7 +1,7 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Tạo vai trò
+    Thêm vai trò
 @endsection
 
 @section('content')
@@ -10,7 +10,7 @@
             Vai trò
         @endslot
         @slot('title')
-            Tạo vai trò
+            Thêm vai trò
         @endslot
     @endcomponent
 
@@ -18,7 +18,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-4">Tạo vai trò</h4>
+                    <h4 class="card-title mb-4">Thêm vai trò</h4>
 
                     <form method="POST" action="{{ route('roles.store') }}" enctype="multipart/form-data">
 

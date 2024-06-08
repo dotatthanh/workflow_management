@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CommentRequest;
 use App\Http\Requests\StoreTaskRequest;
+use App\Jobs\SendTaskDoneEmail;
 use App\Models\Comment;
+use App\Models\Department;
 use App\Models\Label;
 use App\Models\Task;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
 
 class TaskController extends Controller
 {
@@ -25,20 +26,25 @@ class TaskController extends Controller
     {
         $user = auth()->user();
         $tasks = Task::query();
-        if (! $user->hasRole('Admin')) {
-            $tasks = $tasks->whereHas('users', function($query) use ($user) {
+        // Không phải admin và trưởng bộ môn
+        if (! $user->hasRole('Admin') && ! $user->hasRole('Trưởng bộ môn')) {
+            $tasks = $tasks->whereHas('users', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
         }
-        $tasks = $tasks->paginate(10);
-
+        // Trưởng bộ môn
+        if ($user->hasRole('Trưởng bộ môn')) {
+            $tasks = $tasks->where('department_id', $user->department_id);
+        }
+        // tìm kiếm
         if ($request->search) {
-            $tasks = Task::where('title', 'like', '%'.$request->search.'%')->paginate(10);
-            $tasks->appends(['search' => $request->search]);
+            $tasks = $tasks->where('title', 'like', '%'.$request->search.'%');
         }
 
+        $tasks = $tasks->paginate(10)->appends(['search' => $request->search]);
+
         $data = [
-            'tasks' => $tasks
+            'tasks' => $tasks,
         ];
 
         return view('admin.task.index', $data);
@@ -53,8 +59,10 @@ class TaskController extends Controller
     {
         $users = User::all();
         $labels = Label::all();
+        $departments = Department::all();
 
         $data = [
+            'departments' => $departments,
             'users' => $users,
             'labels' => $labels,
         ];
@@ -72,13 +80,19 @@ class TaskController extends Controller
     {
         try {
             DB::beginTransaction();
+            $user = auth()->user();
+            if (! $user->hasRole('Admin')) {
+                $request->department_id = $user->department_id;
+            }
+
             $task = Task::create([
+                'department_id' => $request->department_id,
                 'title' => $request->title,
-                'start_date' => date("Y-m-d", strtotime($request->start_date)),
-                'end_date' => date("Y-m-d", strtotime($request->end_date)),
+                'start_date' => $request->start_date ? date('Y-m-d', strtotime($request->start_date)) : null,
+                'end_date' => $request->end_date ? date('Y-m-d', strtotime($request->end_date)) : null,
                 'priority' => $request->priority,
                 'progress' => $request->progress,
-                'estimated_time' => $request->estimated_time ? date("Y-m-d", strtotime($request->estimated_time)) : null,
+                'estimated_time' => $request->estimated_time ? date('Y-m-d', strtotime($request->estimated_time)) : null,
                 'description' => $request->description,
                 'status' => $request->status,
             ]);
@@ -86,18 +100,24 @@ class TaskController extends Controller
             $task->users()->attach($request->users);
             $task->labels()->attach($request->labels);
 
+            // Gửi mail khi trạng thái là "Đã giải quyết"
+            if ($task->status == 5) {
+                $this->sendMail($task);
+            }
+
             DB::commit();
-            return redirect()->route('tasks.index')->with('alert-success','Thêm công việc thành công!');
+
+            return redirect()->route('tasks.index')->with('alert-success', 'Thêm công việc thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Thêm công việc thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Thêm công việc thất bại!');
         }
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
     public function show(Task $task)
@@ -105,8 +125,10 @@ class TaskController extends Controller
         $users = User::all();
         $labels = Label::all();
         $comments = Comment::where('task_id', $task->id)->get();
+        $departments = Department::all();
 
         $data = [
+            'departments' => $departments,
             'users' => $users,
             'labels' => $labels,
             'data_edit' => $task,
@@ -119,15 +141,17 @@ class TaskController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
     public function edit(Task $task)
     {
-        $users = User::all();
+        $departmentId = old('department_id', $task->department_id);
+        $users = User::where('department_id', $departmentId)->get();
         $labels = Label::all();
+        $departments = Department::all();
 
         $data = [
+            'departments' => $departments,
             'users' => $users,
             'labels' => $labels,
             'data_edit' => $task,
@@ -140,40 +164,52 @@ class TaskController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
     public function update(StoreTaskRequest $request, Task $task)
     {
         try {
             DB::beginTransaction();
+            $user = auth()->user();
+            if (! $user->hasRole('Admin')) {
+                $request->department_id = $user->department_id;
+            }
 
             $task->update([
+                'department_id' => $request->department_id,
                 'title' => $request->title,
-                'start_date' => date("Y-m-d", strtotime($request->start_date)),
-                'end_date' => date("Y-m-d", strtotime($request->end_date)),
+                'start_date' => $request->start_date ? date('Y-m-d', strtotime($request->start_date)) : null,
+                'end_date' => $request->end_date ? date('Y-m-d', strtotime($request->end_date)) : null,
                 'priority' => $request->priority,
                 'progress' => $request->progress,
-                'estimated_time' => $request->estimated_time ? date("Y-m-d", strtotime($request->estimated_time)) : null,
+                'estimated_time' => $request->estimated_time ? date('Y-m-d', strtotime($request->estimated_time)) : null,
                 'description' => $request->description,
                 'status' => $request->status,
             ]);
 
-            $task->users()->sync($request->users);
+            if ($user->hasRole('Admin') || $user->hasRole('Trưởng bộ môn')) {
+                $task->users()->sync($request->users);
+            }
             $task->labels()->sync($request->labels);
 
+            // Gửi mail khi trạng thái là "Đã giải quyết"
+            if ($task->status == 5) {
+                $this->sendMail($task);
+            }
+
             DB::commit();
-            return redirect()->route('tasks.index')->with('alert-success','Sửa công việc thành công!');
+
+            return redirect()->route('tasks.index')->with('alert-success', 'Sửa công việc thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Sửa công việc thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Sửa công việc thất bại!');
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
     public function destroy(Task $task)
@@ -186,14 +222,17 @@ class TaskController extends Controller
             $task->destroy($task->id);
 
             DB::commit();
-            return redirect()->route('tasks.index')->with('alert-success','Xóa công việc thành công!');
+
+            return redirect()->route('tasks.index')->with('alert-success', 'Xóa công việc thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Xóa công việc thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Xóa công việc thất bại!');
         }
     }
 
-    public function comment(CommentRequest $request, $id) {
+    public function comment(CommentRequest $request, $id)
+    {
         try {
             DB::beginTransaction();
 
@@ -204,10 +243,22 @@ class TaskController extends Controller
             ]);
 
             DB::commit();
-            return redirect()->back()->with('alert-success','Bạn đã bình luận thành công!');
+
+            return redirect()->back()->with('alert-success', 'Bạn đã bình luận thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Bạn đã bình luận thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Bạn đã bình luận thất bại!');
         }
+    }
+
+    private function sendMail($task)
+    {
+        $emailAdmins = User::role('Admin')->get()->pluck('email')->toArray();
+        $emailDepartments = User::role('Trưởng bộ môn')->where('department_id', $task->department_id)->get()->pluck('email')->toArray();
+
+        $job = (new SendTaskDoneEmail($emailAdmins, $task->toArray(), $emailDepartments))
+            ->delay(now());
+        dispatch($job);
     }
 }

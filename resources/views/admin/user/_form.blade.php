@@ -104,6 +104,22 @@
             </select>
             {!! $errors->first('roles', '<span class="error">:message</span>') !!}
         </div>
+
+        @hasrole('Admin')
+        <div class="form-group mb-4">
+            <label for="department_id" class="col-form-label col-lg-2">Bộ môn <span class="text-danger">*</span></label>
+            <select name="department_id" id="department_id" class="form-control" {{ isset($isDetailPage) ? 'disabled' : ''}}>
+                <option value="">Chọn bộ môn</option>
+                @foreach ($departments as $item)
+                    <option value="{{ $item->id }}"
+                        {{ old('department_id', $data_edit->department_id ?? '') == $item->id ? 'selected' : '' }}>
+                        {{ $item->name }}
+                    </option>
+                @endforeach
+            </select>
+            {!! $errors->first('department_id', '<span class="error">:message</span>') !!}
+        </div>
+        @endhasrole
     </div>
 </div>
 

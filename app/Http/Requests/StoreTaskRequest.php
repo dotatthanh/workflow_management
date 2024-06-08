@@ -23,7 +23,8 @@ class StoreTaskRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        // dd($this->all());
+        $rules = [
             'title' => 'required|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
@@ -32,11 +33,17 @@ class StoreTaskRequest extends FormRequest
             'estimated_time' => 'nullable|date',
             'status' => 'required',
         ];
+
+        if (auth()->user()->hasRole('Admin')) {
+            $rules['department_id'] = 'required';
+        }
+
+        return $rules;
     }
 
     public function messages()
     {
-        return [
+        $messages = [
             'title.required' => 'Tiêu đề là trường bắt buộc.',
             'title.max' => 'Tiêu đề không được dài quá :max ký tự.',
             'start_date.date' => 'Ngày bắt đầu không đúng định dạng ngày tháng năm.',
@@ -49,5 +56,11 @@ class StoreTaskRequest extends FormRequest
             'estimated_time.date' => 'Thời gian dự kiến hoàn thành không đúng định dạng ngày tháng năm.',
             'status.required' => 'Trạng thái là trường bắt buộc.',
         ];
+
+        if (auth()->user()->hasRole('Admin')) {
+            $messages['department_id.required'] = 'Bộ môn là trường bắt buộc.';
+        }
+
+        return $messages;
     }
 }

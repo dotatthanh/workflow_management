@@ -1,7 +1,7 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Tạo tài khoản
+    Thêm tài khoản
 @endsection
 
 @section('content')
@@ -10,7 +10,7 @@
             Tài khoản
         @endslot
         @slot('title')
-            Tạo tài khoản
+            Thêm tài khoản
         @endslot
     @endcomponent
     <div class="row">

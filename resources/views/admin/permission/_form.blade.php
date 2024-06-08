@@ -8,7 +8,7 @@
 	<div class="col-sm-4 mb-3">
 		@foreach ($permissions as $permission)
 			@if ($loop->iteration == 1)
-				<h5>Quản tài khoản</h5>
+                <h5>Quản lý nhãn dán</h5>
 			@endif
 
 			<div class="custom-control custom-checkbox custom-checkbox-info mb-3">
@@ -19,28 +19,21 @@
 			@if ($loop->iteration == 4)
 				</div>
 				<div class="col-sm-4 mb-3">
-					<h5>Quản lý nhãn dán</h5>
-			@endif
+                <h5>Quản lý vai trò</h5>
+            @endif
 
 			@if ($loop->iteration == 8)
 				</div>
 				<div class="col-sm-4 mb-3">
-					<h5>Quản lý công việc</h5>
-			@endif
+                    <h5>Quản lý quyền</h5>
+            @endif
 
-			@if ($loop->iteration == 13)
+			@if ($loop->iteration == 11)
 				</div>
 				<div class="col-sm-4 mb-3">
-					<h5>Quản lý vai trò</h5>
-			@endif
-
-			@if ($loop->iteration == 17)
-				</div>
-				<div class="col-sm-4 mb-3">
-					<h5>Quản lý quyền</h5>
-			@endif
+                    <h5>Quản lý bộ môn</h5>
+            @endif
 		@endforeach
-
 	</div>
 </div>
 

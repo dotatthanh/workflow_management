@@ -55,6 +55,50 @@
 
     <!-- init js -->
     <script src="{{ asset('assets\js\pages\ecommerce-select2.init.js') }}"></script>
+
+    <script>
+        function changeDepartment() {
+            var id = $(`select[name="department_id"]`).val();
+            if (id){
+                $.ajax({
+                    url: "/admin/users/get-user-list-by-department/"+id,
+                    type: "GET",
+                    success: function (respon) {
+                        if (respon.data) {
+                            $('select[name="users[]"]').empty();
+                            if (respon.data.length > 0) {
+                                $(`select[name="users[]"]`).prop('disabled', false);
+                                $.each(respon.data, function(index, item) {
+                                    $('select[name="users[]"]').append('<option value="' + item.id + '">' + item.name + '</option>');
+                                });
+                                // Cập nhật select2 để áp dụng placeholder mới
+                                $(`select[name="users[]"]`).data('placeholder', 'Chọn người thực hiện');
+                            }
+                            else {
+                                $(`select[name="users[]"]`).prop('disabled', true);
+                                // Cập nhật select2 để áp dụng placeholder mới
+                                $(`select[name="users[]"]`).data('placeholder', 'Không có người thực hiên');
+                            }
+                            $(`select[name="users[]"]`).select2({
+                                placeholder: $(`select[name="users[]"]`).data('placeholder')
+                            });
+                            $('select[name="users[]"]').select2();
+                        }
+                    },
+                    errors: function () {
+                        alert('Lỗi server!!!');
+                    }
+                });
+            }
+            else {
+                $(`select[name="users[]"]`).prop('disabled', true);
+            }
+        }
+
+        // $(document).ready(function() {
+        //     changeDepartment();
+        // })
+    </script>
 @endsection
 
 @section('css')

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Department;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -23,15 +24,25 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $users = User::paginate(10);
+        $users = User::query();
 
-        if ($request->search) {
-            $users = User::where('name', 'like', '%'.$request->search.'%')->paginate(10);
-            $users->appends(['search' => $request->search]);
+        $user = auth()->user();
+        if (! $user->hasRole('Admin')) {
+            $users = $users->where('department_id', $user->department_id);
         }
 
+        if ($request->search) {
+            $users = $users->where('name', 'like', '%'.$request->search.'%');
+        }
+
+        if ($request->department_id) {
+            $users = $users->where('department_id', $request->department_id);
+        }
+
+        $users = $users->paginate(10)->appends(['search' => $request->search]);
+
         $data = [
-            'users' => $users
+            'users' => $users,
         ];
 
         return view('admin.user.index', $data);
@@ -45,9 +56,11 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::all();
+        $departments = Department::all();
 
         $data = [
-            'roles' => $roles
+            'departments' => $departments,
+            'roles' => $roles,
         ];
 
         return view('admin.user.create', $data);
@@ -63,6 +76,10 @@ class UserController extends Controller
     {
         try {
             DB::beginTransaction();
+            $user = auth()->user();
+            if (! $user->hasRole('Admin')) {
+                $request->department_id = $user->department_id;
+            }
 
             $file_path = '';
             if ($request->file('avatar')) {
@@ -73,11 +90,12 @@ class UserController extends Controller
 
             $create = User::create([
                 'code' => '',
+                'department_id' => $request->department_id,
                 'name' => $request->name,
                 'password' => bcrypt($request->password),
                 'email' => $request->email,
                 'gender' => $request->gender,
-                'birthday' => date("Y-m-d", strtotime($request->birthday)),
+                'birthday' => date('Y-m-d', strtotime($request->birthday)),
                 'phone_number' => $request->phone_number,
                 'address' => $request->address,
                 'avatar' => $file_path,
@@ -89,30 +107,33 @@ class UserController extends Controller
             }
 
             $create->update([
-                'code' => 'TK'.str_pad($create->id, 6, '0', STR_PAD_LEFT)
+                'code' => 'TK'.str_pad($create->id, 6, '0', STR_PAD_LEFT),
             ]);
 
             DB::commit();
-            return redirect()->route('users.index')->with('alert-success','Thêm tài khoản thành công!');
+
+            return redirect()->route('users.index')->with('alert-success', 'Thêm tài khoản thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Thêm tài khoản thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Thêm tài khoản thất bại!');
         }
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function show(User $user)
     {
         $roles = Role::all();
+        $departments = Department::all();
 
         $data = [
+            'departments' => $departments,
             'user' => $user,
-            'roles' => $roles
+            'roles' => $roles,
         ];
 
         return view('admin.user.profile', $data);
@@ -121,16 +142,17 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
         $roles = Role::all();
+        $departments = Department::all();
 
         $data = [
+            'departments' => $departments,
             'data_edit' => $user,
-            'roles' => $roles
+            'roles' => $roles,
         ];
 
         return view('admin.user.edit', $data);
@@ -140,7 +162,6 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateUserRequest $request, User $user)
@@ -148,31 +169,29 @@ class UserController extends Controller
         try {
             DB::beginTransaction();
 
+            $auth = auth()->user();
+
+            $data = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'gender' => $request->gender,
+                'birthday' => date('Y-m-d', strtotime($request->birthday)),
+                'phone_number' => $request->phone_number,
+                'address' => $request->address,
+            ];
+
+            if ($auth->hasRole('Admin')) {
+                $data['department_id'] = $request->department_id;
+            }
+
             if ($request->file('avatar')) {
                 $name = time().'_'.$request->avatar->getClientOriginalName();
                 $file_path = 'uploads/avatar/user/'.$name;
                 Storage::disk('public_uploads')->putFileAs('avatar/user', $request->avatar, $name);
+                $data['avatar'] = $file_path;
 
-                $user->update([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'gender' => $request->gender,
-                    'birthday' => date("Y-m-d", strtotime($request->birthday)),
-                    'phone_number' => $request->phone_number,
-                    'address' => $request->address,
-                    'avatar' => $file_path,
-                ]);
             }
-            else {
-                $user->update([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'gender' => $request->gender,
-                    'birthday' => date("Y-m-d", strtotime($request->birthday)),
-                    'phone_number' => $request->phone_number,
-                    'address' => $request->address,
-                ]);
-            }
+            $user->update($data);
 
             $user->roles()->detach();
 
@@ -182,17 +201,19 @@ class UserController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('users.index')->with('alert-success','Sửa tài khoản thành công!');
+
+            return redirect()->route('users.index')->with('alert-success', 'Sửa tài khoản thành công!');
         } catch (Exception $e) {
+            dd($e);
             DB::rollback();
-            return redirect()->back()->with('alert-error','Sửa tài khoản thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Sửa tài khoản thất bại!');
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
@@ -204,10 +225,12 @@ class UserController extends Controller
             $user->destroy($user->id);
 
             DB::commit();
-            return redirect()->route('users.index')->with('alert-success','Xóa tài khoản thành công!');
+
+            return redirect()->route('users.index')->with('alert-success', 'Xóa tài khoản thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Xóa tài khoản thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Xóa tài khoản thất bại!');
         }
     }
 
@@ -232,10 +255,19 @@ class UserController extends Controller
             }
 
             DB::commit();
-            return redirect()->back()->with('alert-success','Đổi mật khẩu thành công!');
+
+            return redirect()->back()->with('alert-success', 'Đổi mật khẩu thành công!');
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('alert-error','Đổi mật khẩu thất bại!');
+
+            return redirect()->back()->with('alert-error', 'Đổi mật khẩu thất bại!');
         }
+    }
+
+    public function getUserListByDepartment($departmentId)
+    {
+        $users = User::where('department_id', $departmentId)->get();
+
+        return response()->json(['data' => $users]);
     }
 }

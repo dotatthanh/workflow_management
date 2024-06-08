@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
@@ -14,10 +14,11 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        // // Tạo admin
+        // // Thêm admin
         User::truncate();
         User::create([
             'id' => 1,
+            'department_id' => 0,
             'code' => 'ADMIN',
             'email' => 'admin@gmail.com',
             'password' => bcrypt('123123123'),

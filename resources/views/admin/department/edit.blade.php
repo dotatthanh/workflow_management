@@ -1,16 +1,16 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Thêm tài khoản
+    Cập nhật bộ môn
 @endsection
 
 @section('content')
     @component('components.breadcrumb')
         @slot('li_1')
-            Tài khoản
+            Bộ môn
         @endslot
         @slot('title')
-            Thêm tài khoản
+            Cập nhật bộ môn
         @endslot
     @endcomponent
 
@@ -18,11 +18,11 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-4">Thêm tài khoản</h4>
+                    <h4 class="card-title mb-4">Cập nhật bộ môn</h4>
 
-                    <form method="POST" action="{{ route('users.store') }}" enctype="multipart/form-data">
-
-                        @include('admin.user._form', ['routeType' => 'create'])
+                    <form method="POST" action="{{ route('departments.update', $data_edit->id) }}" enctype="multipart/form-data">
+                        @method('PUT')
+                        @include('admin.department._form', ['routeType' => 'edit'])
 
                     </form>
                 </div>

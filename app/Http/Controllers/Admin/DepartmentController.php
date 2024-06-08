@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\StoreDepartmentRequest;
+use App\Models\Department;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
 
-class RoleController extends Controller
+class DepartmentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,18 +18,18 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        $roles = Role::paginate(10);
+        $departments = Department::paginate(10);
 
         if ($request->search) {
-            $roles = Role::where('name', 'like', '%'.$request->search.'%')->paginate(10);
-            $roles->appends(['search' => $request->search]);
+            $departments = Department::where('name', 'like', '%'.$request->search.'%')->paginate(10);
+            $departments->appends(['search' => $request->search]);
         }
 
         $data = [
-            'roles' => $roles,
+            'departments' => $departments,
         ];
 
-        return view('admin.role.index', $data);
+        return view('admin.department.index', $data);
     }
 
     /**
@@ -39,7 +39,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        return view('admin.role.create');
+        return view('admin.department.create');
     }
 
     /**
@@ -48,23 +48,23 @@ class RoleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreRoleRequest $request)
+    public function store(StoreDepartmentRequest $request)
     {
         try {
             DB::beginTransaction();
 
-            $create = Role::create([
+            $create = Department::create([
                 'name' => $request->name,
                 'guard_name' => 'admin',
             ]);
 
             DB::commit();
 
-            return redirect()->route('roles.index')->with('alert-success', 'Thêm vai trò thành công!');
+            return redirect()->route('departments.index')->with('alert-success', 'Thêm bộ môn thành công!');
         } catch (Exception $e) {
             DB::rollback();
 
-            return redirect()->back()->with('alert-error', 'Thêm vai trò thất bại!');
+            return redirect()->back()->with('alert-error', 'Thêm bộ môn thất bại!');
         }
     }
 
@@ -87,13 +87,13 @@ class RoleController extends Controller
      */
     public function edit($id)
     {
-        $role = Role::findOrFail($id);
+        $department = Department::findOrFail($id);
 
         $data = [
-            'data_edit' => $role,
+            'data_edit' => $department,
         ];
 
-        return view('admin.role.edit', $data);
+        return view('admin.department.edit', $data);
     }
 
     /**
@@ -103,22 +103,22 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreRoleRequest $request, $id)
+    public function update(StoreDepartmentRequest $request, $id)
     {
         try {
             DB::beginTransaction();
 
-            $update = Role::findOrFail($id)->update([
+            $update = Department::findOrFail($id)->update([
                 'name' => $request->name,
             ]);
 
             DB::commit();
 
-            return redirect()->route('roles.index')->with('alert-success', 'Cập nhật vai trò thành công!');
+            return redirect()->route('departments.index')->with('alert-success', 'Cập nhật bộ môn thành công!');
         } catch (Exception $e) {
             DB::rollback();
 
-            return redirect()->back()->with('alert-error', 'Cập nhật vai trò thất bại!');
+            return redirect()->back()->with('alert-error', 'Cập nhật bộ môn thất bại!');
         }
     }
 
@@ -133,22 +133,20 @@ class RoleController extends Controller
         try {
             DB::beginTransaction();
 
-            $role = Role::findOrFail($id);
+            $department = Department::findOrFail($id);
 
-            if ($role->users->count() > 0) {
-                return redirect()->back()->with('alert-error', 'Xóa vai trò thất bại! Vai trò '.$role->name.' đang có tài khoản.');
-            } elseif ($role->permissions->count() > 0) {
-                return redirect()->back()->with('alert-error', 'Xóa vai trò thất bại! Vai trò '.$role->name.' đang có quyền.');
+            if ($department->users->count() > 0) {
+                return redirect()->back()->with('alert-error', 'Xóa bộ môn thất bại! Bộ môn '.$department->name.' đang có tài khoản.');
             }
 
-            $role->destroy($id);
+            $department->destroy($id);
             DB::commit();
 
-            return redirect()->route('roles.index')->with('alert-success', 'Xóa vai trò thành công!');
+            return redirect()->route('departments.index')->with('alert-success', 'Xóa bộ môn thành công!');
         } catch (Exception $e) {
             DB::rollback();
 
-            return redirect()->back()->with('alert-error', 'Xóa vai trò thất bại!');
+            return redirect()->back()->with('alert-error', 'Xóa bộ môn thất bại!');
         }
     }
 }
