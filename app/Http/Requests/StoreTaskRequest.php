@@ -23,7 +23,6 @@ class StoreTaskRequest extends FormRequest
      */
     public function rules()
     {
-        // dd($this->all());
         $rules = [
             'title' => 'required|max:255',
             'start_date' => 'nullable|date',
@@ -32,9 +31,10 @@ class StoreTaskRequest extends FormRequest
             'progress' => 'nullable|numeric|min:0|max:100',
             'estimated_time' => 'nullable|date',
             'status' => 'required',
+            'description' => 'nullable|max:1000',
         ];
 
-        if (auth()->user()->hasRole('Admin')) {
+        if (!$this->parent_id && auth()->user()->hasRole('Admin')) {
             $rules['department_id'] = 'required';
         }
 
@@ -55,9 +55,11 @@ class StoreTaskRequest extends FormRequest
             'progress.max' => 'Tiến độ không được quá :max.',
             'estimated_time.date' => 'Thời gian dự kiến hoàn thành không đúng định dạng ngày tháng năm.',
             'status.required' => 'Trạng thái là trường bắt buộc.',
+            'description.required' => 'Mô tả là trường bắt buộc.',
+            'description.required' => 'Mô tả không được quá :max.',
         ];
 
-        if (auth()->user()->hasRole('Admin')) {
+        if (!$this->parent_id && auth()->user()->hasRole('Admin')) {
             $messages['department_id.required'] = 'Bộ môn là trường bắt buộc.';
         }
 

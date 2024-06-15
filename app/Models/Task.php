@@ -19,6 +19,7 @@ class Task extends Model
         'estimated_time',
         'description',
         'status',
+        'parent_id',
     ];
 
     public function users()
@@ -34,5 +35,13 @@ class Task extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function subTasks() {
+        return $this->hasMany(Task::class, 'parent_id');
+    }
+
+    public function isParent() {
+        return $this->parent_id == null;
     }
 }

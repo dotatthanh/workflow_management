@@ -22,6 +22,49 @@
                     <h4 class="card-title mb-4">Chi tiết công việc</h4>
                     @include('admin.task._form', ['isDetailPage' => 1])
 
+                    @if ($data_edit->isParent())
+                    <div>
+                        @hasanyrole('Admin|Trưởng bộ môn')
+                        <a href="{{ route('tasks.create', ['parent_id' => $data_edit->id]) }}" class="float-end">Thêm</a>
+                        @endhasanyrole
+
+                        <h4 class="card-title mb-4">Công việc con</h4>
+
+                        <div class="table-responsive">
+                            <table class="table table-centered table-nowrap">
+                                <tbody>
+                                    @foreach ($data_edit->subTasks as $subTask)
+                                    <tr>
+                                        <td>
+                                            <a href="{{ route('tasks.show', $subTask->id) }}" class="ms-3">{{ $subTask->title }}</a>
+                                        </td>
+                                        <td>{{ getConst('statusTasks')[$subTask->status] }}</td>
+                                        <td>
+                                            <td class="text-center">
+                                                <ul class="list-inline font-size-20 contact-links mb-0">
+                                                    <li class="list-inline-item px">
+                                                        <a href="{{ route('tasks.edit', $subTask->id) }}" data-toggle="tooltip" data-placement="top" title="Sửa"><i class="mdi mdi-pencil text-success"></i></a>
+                                                    </li>
+
+                                                    <li class="list-inline-item px">
+                                                        <form method="post" action="{{ route('tasks.destroy', $subTask->id) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+
+                                                            <button type="submit" data-toggle="tooltip" data-placement="top" title="Xóa" class="border-0 bg-white"><i class="mdi mdi-trash-can text-danger"></i></button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @endif
+
                     @if ($comments->count() > 0)
                     <div class="mt-5">
                         <h5 class="font-size-15"><i class="bx bx-message-dots text-muted align-middle me-1"></i> Bình luận :</h5>

@@ -1,3 +1,7 @@
+@if (request()->parent_id)
+    <input type="text" name="parent_id" hidden value="{{ request()->parent_id }}">
+@endif
+
 <div class="form-group row mb-4">
     <label for="title" class="col-form-label col-lg-2">Tiêu đề <span class="text-danger">*</span></label>
     <div class="col-lg-10">
@@ -7,6 +11,7 @@
     </div>
 </div>
 
+@if (!request()->parent_id)
 @hasrole('Admin')
 <div class="form-group row mb-4">
     <label for="department_id" class="col-form-label col-lg-2">Bộ môn <span class="text-danger">*</span></label>
@@ -24,6 +29,7 @@
     </div>
 </div>
 @endhasrole
+@endif
 
 @hasanyrole('Admin|Trưởng bộ môn')
 <div class="form-group row mb-4">

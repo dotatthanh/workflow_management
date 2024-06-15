@@ -68,7 +68,7 @@
                                 @php ($stt = 1)
                                 @foreach ($tasks as $item)
                                 <tr>
-                                    <td class="text-center">1</td>
+                                    <td class="text-center">{{ $stt++ }}</td>
                                     <td>{{ $item->title }}</td>
                                     <td>{{ $item->department->name }}</td>
                                     <td>

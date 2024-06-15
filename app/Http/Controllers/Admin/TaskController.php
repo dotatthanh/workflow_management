@@ -32,6 +32,9 @@ class TaskController extends Controller
                 $query->where('user_id', $user->id);
             });
         }
+        else {
+            $tasks = $tasks->where('parent_id', null);
+        }
         // Trưởng bộ môn
         if ($user->hasRole('Trưởng bộ môn')) {
             $tasks = $tasks->where('department_id', $user->department_id);
@@ -80,22 +83,25 @@ class TaskController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            $params = $request->all();
             $user = auth()->user();
-            if (! $user->hasRole('Admin')) {
-                $request->department_id = $user->department_id;
+            // là task con THÌ bộ môn = bộ môn task cha
+            if ($request->parent_id) {
+                $parentTask = Task::find($request->parent_id);
+                $params['department_id'] = $parentTask->department_id;
+            }
+            // là task cha
+            else {
+                if (! $user->hasRole('Admin')) {
+                    $params['department_id'] = $user->department_id;
+                }
             }
 
-            $task = Task::create([
-                'department_id' => $request->department_id,
-                'title' => $request->title,
-                'start_date' => $request->start_date ? date('Y-m-d', strtotime($request->start_date)) : null,
-                'end_date' => $request->end_date ? date('Y-m-d', strtotime($request->end_date)) : null,
-                'priority' => $request->priority,
-                'progress' => $request->progress,
-                'estimated_time' => $request->estimated_time ? date('Y-m-d', strtotime($request->estimated_time)) : null,
-                'description' => $request->description,
-                'status' => $request->status,
-            ]);
+            $params['start_date'] = $request->start_date ? date('Y-m-d', strtotime($request->start_date)) : null;
+            $params['end_date'] = $request->end_date ? date('Y-m-d', strtotime($request->end_date)) : null;
+            $params['estimated_time'] = $request->estimated_time ? date('Y-m-d', strtotime($request->estimated_time)) : null;
+            $task = Task::create($params);
 
             $task->users()->attach($request->users);
             $task->labels()->attach($request->labels);
@@ -107,8 +113,12 @@ class TaskController extends Controller
 
             DB::commit();
 
+            if (isset($params['parent_id'])) {
+                return redirect()->route('tasks.show', $params['parent_id'])->with('alert-success', 'Thêm công việc thành công!');
+            }
             return redirect()->route('tasks.index')->with('alert-success', 'Thêm công việc thành công!');
         } catch (Exception $e) {
+            dd($e);
             DB::rollback();
 
             return redirect()->back()->with('alert-error', 'Thêm công việc thất bại!');
@@ -170,22 +180,26 @@ class TaskController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            $params = $request->all();
             $user = auth()->user();
-            if (! $user->hasRole('Admin')) {
-                $request->department_id = $user->department_id;
+            // là task con THÌ bộ môn = bộ môn task cha
+            if ($request->parent_id) {
+                $parentTask = Task::find($request->parent_id);
+                $params['department_id'] = $parentTask->department_id;
+            }
+            // là task cha
+            else {
+                if (! $user->hasRole('Admin')) {
+                    $params['department_id'] = $user->department_id;
+                }
             }
 
-            $task->update([
-                'department_id' => $request->department_id,
-                'title' => $request->title,
-                'start_date' => $request->start_date ? date('Y-m-d', strtotime($request->start_date)) : null,
-                'end_date' => $request->end_date ? date('Y-m-d', strtotime($request->end_date)) : null,
-                'priority' => $request->priority,
-                'progress' => $request->progress,
-                'estimated_time' => $request->estimated_time ? date('Y-m-d', strtotime($request->estimated_time)) : null,
-                'description' => $request->description,
-                'status' => $request->status,
-            ]);
+            $params['start_date'] = $request->start_date ? date('Y-m-d', strtotime($request->start_date)) : null;
+            $params['end_date'] = $request->end_date ? date('Y-m-d', strtotime($request->end_date)) : null;
+            $params['estimated_time'] = $request->estimated_time ? date('Y-m-d', strtotime($request->estimated_time)) : null;
+
+            $task->update($params);
 
             if ($user->hasRole('Admin') || $user->hasRole('Trưởng bộ môn')) {
                 $task->users()->sync($request->users);
@@ -199,6 +213,9 @@ class TaskController extends Controller
 
             DB::commit();
 
+            if (!empty($task->parent_id)) {
+                return redirect()->route('tasks.show', $task->parent_id)->with('alert-success', 'Thêm công việc thành công!');
+            }
             return redirect()->route('tasks.index')->with('alert-success', 'Sửa công việc thành công!');
         } catch (Exception $e) {
             DB::rollback();
@@ -217,13 +234,17 @@ class TaskController extends Controller
         try {
             DB::beginTransaction();
 
+            if ($task->isParent() && $task->subTasks->count() > 0) {
+                return redirect()->back()->with('alert-error', 'Xóa công việc thất bại! Công việc "'.$task->title.'" đang có công việc con.');
+            }
+
             $task->users()->detach();
             $task->labels()->detach();
             $task->destroy($task->id);
 
             DB::commit();
 
-            return redirect()->route('tasks.index')->with('alert-success', 'Xóa công việc thành công!');
+            return redirect()->back()->with('alert-success', 'Xóa công việc thành công!');
         } catch (Exception $e) {
             DB::rollback();
 
