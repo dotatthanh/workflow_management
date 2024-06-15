@@ -58,11 +58,16 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        $users = User::all();
+        $users = User::where('id', '!=', 1);
         $labels = Label::all();
         $departments = Department::all();
+        if ($request->parent_id) {
+            $departmentId = Task::find($request->parent_id)->department_id;
+            $users = $users->where('department_id', $departmentId);
+        }
+        $users = $users->get();
 
         $data = [
             'departments' => $departments,
